@@ -378,8 +378,6 @@ After running the both nodes, I observed that they discovered each other and sta
             dispatch_info: DispatchInfo { weight: Weight { ref_time: 3500476303, proof_size: 9095 }, class: Normal, pays_fee: Yes }
 
        Contract 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
-
-
    ```
 
    and the `substrate-contracts-node` terminal outputs
