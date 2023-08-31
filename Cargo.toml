@@ -4,5 +4,8 @@ members = [
     "pallets/template",
     "runtime",
 ]
+exclude = [
+    "smart contract/flipper"
+]
 [profile.release]
 panic = "unwind"
