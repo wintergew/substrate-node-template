@@ -2,6 +2,24 @@
 
 The following are the steps I've been taken during the making of my final project.
 
+## Table of contents
+
+- [Polkadot Substrate Development Final Project](#polkadot-substrate-development-final-project)
+  * [1. Building a blockchain](#1-building-a-blockchain)
+  * [2. Simulating a substrate network](#2-simulating-a-substrate-network)
+  * [3. Adding trusted nodes to a network.](#3-adding-trusted-nodes-to-a-network)
+    + [Generating Aura and Grandpa keys for Account 1](#generating-aura-and-grandpa-keys-for-account-1)
+    + [Generating Aura and Grandpa keys for Account 2](#generating-aura-and-grandpa-keys-for-account-2)
+    + [Custom Spec](#custom-spec)
+    + [Adding Account 1 keys to keystore](#adding-account-1-keys-to-keystore)
+    + [Adding Account 2 keys to keystore](#adding-account-2-keys-to-keystore)
+    + [Starting the nodes](#starting-the-nodes)
+  * [8. Smart contracts](#8-smart-contracts)
+    + [Preparing the environment](#preparing-the-environment)
+    + [Creating the smart contract](#creating-the-smart-contract)
+    + [Deploying the smart contract](#deploying-the-smart-contract)
+    + [Interacting with the smart contract](#interacting-with-the-smart-contract)
+
 ## 1. Building a blockchain
 
 1. Forked the substrate-node-template repository
@@ -52,11 +70,13 @@ The following are the steps I've been taken during the making of my final projec
    ```
 
    and the
+
    ```
    💤 Idle (0 peers), best: #0 (0x2f6a…8b1a), finalized #0 (0x2f6a…8b1a), ⬇ 0 ⬆ 0  
    ```
 
    changes to (notice the peer count);
+
    ```
    💤 Idle (1 peers), best: #2 (0x290d…a070), finalized #0 (0x2f6a…8b1a), ⬇ 0.6kiB/s ⬆ 0.6kiB/s   
    ```
@@ -279,3 +299,134 @@ After running the both nodes, I observed that they discovered each other and sta
 ```
 
 ## 8. Smart contracts
+
+### Preparing the environment
+
+1. Skipped installing wasm as I installed it in the first step. But I tried the update rust but it was already at the last version.
+2. Installed the `cargo-contract` package. The latest version was 3.2.0, so I changed it in the code
+
+   ```
+   cargo install --force --locked cargo-contract --version 3.2.0
+   ```
+3. Downloaded the `substrate-contracts-node` binaries in another folder from github and extracted it using;
+
+   ```
+   wget https://github.com/paritytech/substrate-contracts-node/releases/download/v0.30.0/substrate-contracts-node-linux.tar.gz &&\
+   mkdir substrate-contracts-node &&\
+   tar -xvf substrate-contracts-node-linux.tar.gz -C substrate-contracts-node &&\
+   cd substrate-contracts-node/artifacts/substrate-contracts-node-linux &&\
+   chmod +x substrate-contracts-node
+   ```
+
+### Creating the smart contract
+
+4. In another terminal, run `cargo contract new flipper` to create a new contract project folder called flipper [17e67c2](https://github.com/wintergew/substrate-node-template/commit/17e67c27cfdb91ddd89ad7ca83d47c0f6f875358).
+5. Test if the contract compiles with `cargo test` and compile the contract using `cargo contract build`. This creates 3 artifacts;
+
+- flipper.contract (code + metadata)
+- flipper.wasm (the contract's code)
+- flipper.json (the contract's metadata)
+
+### Deploying the smart contract
+
+6. Run the `substrate-contracts-node` with `./substrate-contracts-node --log info,runtime::contracts=debug 2>&1` so it outputs the debug information.
+7. In the flipper folder instantiate the smart contract using (added the `-x` and  `--skip-confirm` arguments);
+
+   ```
+   cargo contract instantiate -x --skip-confirm --constructor new --args "false" --suri //Alice --salt $(date +%s)
+   ```
+
+   which outputs
+
+   ```
+    Dry-running new (skip with --skip-dry-run)
+       Success! Gas required estimated at Weight(ref_time: 276548162, proof_size: 16689)
+         Events
+          Event Balances ➜ Withdraw
+            who: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            amount: 124.425706μUNIT
+          Event System ➜ NewAccount
+            account: 5F8LUz7pRdkHbQM2CNVWwEqeDaqasfXYaZvd5xzmiXPjneAd
+          Event Balances ➜ Endowed
+            account: 5F8LUz7pRdkHbQM2CNVWwEqeDaqasfXYaZvd5xzmiXPjneAd
+            free_balance: 100.765mUNIT
+          Event Balances ➜ Transfer
+            from: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            to: 5F8LUz7pRdkHbQM2CNVWwEqeDaqasfXYaZvd5xzmiXPjneAd
+            amount: 100.765mUNIT
+          Event System ➜ NewAccount
+            account: 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
+          Event Balances ➜ Endowed
+            account: 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
+            free_balance: 1mUNIT
+          Event Balances ➜ Transfer
+            from: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            to: 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
+            amount: 1mUNIT
+          Event Contracts ➜ Instantiated
+            deployer: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            contract: 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
+          Event Balances ➜ Transfer
+            from: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            to: 5F8LUz7pRdkHbQM2CNVWwEqeDaqasfXYaZvd5xzmiXPjneAd
+            amount: 100.005mUNIT
+          Event TransactionPayment ➜ TransactionFeePaid
+            who: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            actual_fee: 124.425706μUNIT
+            tip: 0UNIT
+          Event System ➜ ExtrinsicSuccess
+            dispatch_info: DispatchInfo { weight: Weight { ref_time: 3500476303, proof_size: 9095 }, class: Normal, pays_fee: Yes }
+
+       Contract 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
+
+
+   ```
+
+   and the `substrate-contracts-node` terminal outputs
+
+   ```
+   INFO tokio-runtime-worker jsonrpsee_server::server: Accepting new connection 1/100
+   INFO tokio-runtime-worker jsonrpsee_server::server: Accepting new connection 2/100
+   ```
+
+### Interacting with the smart contract
+
+8. Trying the `get()` function in the smart contract. Replaced the contract adress with the generated adress.
+
+   ```
+   cargo contract call --contract 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC --message get --suri //Alice --dry-run
+
+   ```
+   which outputs
+
+   ```
+   Result Success!
+   Reverted false
+    Data Ok(false)
+   Your message call has not been executed.
+   To submit the transaction and execute the call on chain, add -x/--execute flag to the command.
+   ```
+9. Trying the `flip()` function in the smart contract.
+
+   ```
+   cargo contract call --contract 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC --message flip --suri //Alice -x --skip-confirm
+   ```
+   which outputs
+
+   ```
+    Dry-running flip (skip with --skip-dry-run)
+       Success! Gas required estimated at Weight(ref_time: 784946611, proof_size: 28563)
+         Events
+          Event Balances ➜ Withdraw
+            who: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            amount: 124.414154μUNIT
+          Event Contracts ➜ Called
+            caller: Signed(5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY)
+            contract: 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC
+          Event TransactionPayment ➜ TransactionFeePaid
+            who: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
+            actual_fee: 124.414154μUNIT
+            tip: 0UNIT
+          Event System ➜ ExtrinsicSuccess
+            dispatch_info: DispatchInfo { weight: Weight { ref_time: 1726603611, proof_size: 18985 }, class: Normal, pays_fee: Yes }
+   ```
