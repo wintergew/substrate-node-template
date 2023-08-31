@@ -395,7 +395,6 @@ After running the both nodes, I observed that they discovered each other and sta
 
    ```
    cargo contract call --contract 5Fky7RVZ4RJvHXDg7LeuyZqZRRbzvTazBFkZ6Wg4cnq7ZbAC --message get --suri //Alice --dry-run
-
    ```
    which outputs
 
